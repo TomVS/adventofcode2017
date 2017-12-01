@@ -8,6 +8,14 @@ def doubleSum(val):
             total += int(v)
     return total
 
+def halfwaySum(val):
+    total = 0
+    offset = len(val)/2
+    for i,v in enumerate(val):
+        if val[(i+offset)%len(val)] == v:
+            total += int(v)
+
+    return total
 
 if __name__ == "__main__":
     import sys
@@ -18,4 +26,8 @@ if __name__ == "__main__":
         val = f.read().strip()
     if val:
         print val
-        print "TADAA:", doubleSum(val)
+        print len(val)
+        print "=========================="
+        print "Sum of all doubled digits:", doubleSum(val)
+        print "Sum of halfway digits:", halfwaySum(val)
+
