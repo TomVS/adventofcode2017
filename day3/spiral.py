@@ -36,6 +36,41 @@ Your puzzle input is 265149.
 import math
 import sys
 
+def spiralDist(data):
+
+    print "Input value:", data
+
+    if data == 1:
+        print "Special case: 1"
+        return 0
+
+    lower = 1
+    upper = 3
+    level = 0
+
+    # Find the lower and upper level bounds
+    i = 1
+    while True:
+        p = i**2
+        if p >= data:
+            upper = i
+            lower = i-2
+            break
+        i += 2
+        level += 1
+
+    print "lower", lower, "upper", upper, "level", level
+    offset = data - (lower**2)
+    print "offset", offset
+    modulo = upper-1
+    adjOffset = ((offset)%modulo) - level
+    print "new", (offset)%modulo, '-', level , '=', adjOffset
+    joinMiddleSteps = abs(adjOffset)
+    joinCentreSteps = level
+    print "steps to middle of side", joinMiddleSteps
+    print "steps to centre from middle", joinCentreSteps
+    print "Sum", joinCentreSteps + joinMiddleSteps
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: %s <input_file>" % sys.argv[0])
@@ -44,27 +79,11 @@ def main():
     with open(sys.argv[1]) as f:
         data = int(f.read().strip())
 
-    print "Input value:", data
-    start = 1
-    lower = int(math.floor(math.sqrt(data)))
-    upper = lower+2
+    spiralDist(data)
 
-    i = 1
-    while True:
-        p = i**2
-        if p < data:
-            lower = p
-        if p > data:
-            upper = p
-            break
-        i += 2
-        print i, "=>", p
-
-    offset = data - (lower**2)
-    joinMiddleSteps = math.floor(((offset+1)%lower)/2)
-    print "offset", offset, (offset+1)%lower, joinMiddleSteps
-    print "lower", lower
-    print "Sum", lower + joinMiddleSteps - 1
+    # for i in range(1020, 1025):
+    #     print "======================================="
+    #     spiralDist(i)
 
 
 if __name__ == '__main__':
