@@ -31,6 +31,30 @@ How many steps are required to carry the data from the square identified
 in your puzzle input all the way to the access port?
 
 Your puzzle input is 265149.
+
+--- Part Two ---
+
+As a stress test on the system, the programs here clear the grid and then store the value 1 in square 1. Then, in the same allocation order as shown above, they store the sum of the values in all adjacent squares, including diagonals.
+
+So, the first few squares' values are chosen as follows:
+
+    Square 1 starts with the value 1.
+    Square 2 has only one adjacent filled square (with value 1), so it also stores 1.
+    Square 3 has both of the above squares as neighbors and stores the sum of their values, 2.
+    Square 4 has all three of the aforementioned squares as neighbors and stores the sum of their values, 4.
+    Square 5 only has the first and fourth squares as neighbors, so it gets the value 5.
+
+Once a square is written, its value does not change. Therefore, the first few squares would receive the following values:
+
+147  142  133  122   59
+304    5    4    2   57
+330   10    1    1   54
+351   11   23   25   26
+362  747  806--->   ...
+
+What is the first value written that is larger than your puzzle input?
+
+Your puzzle input is still 265149.
 '''
 
 import math
@@ -71,6 +95,53 @@ def spiralDist(data):
     print "steps to centre from middle", joinCentreSteps
     print "Sum", joinCentreSteps + joinMiddleSteps
 
+
+def spiralSum(data):
+    size = int(math.ceil(math.sqrt(data)))
+
+    startx = size/2
+    starty = size/2
+
+    print data, size, startx, starty
+
+    matrix = [[0 for i in range(size)] for j in range(size)]
+
+    firstBiggestSum = 0
+    localSum = 0
+
+    x = startx
+    y = starty
+    dirs = [(0,1),(-1,0),(0,-1),(1,0)]
+    neighbours = [(0,1),(1,1),(1,0),(1,-1),(0,-1),(-1,-1),(-1,0),(-1,1)]
+    curDirIdx = 0 # start by going right
+    for n in range(data):
+        # Now add sum of cells around
+        if n == 0:
+            matrix[x][y] = 1
+        else:
+            localSum = 0
+            for i, xy in enumerate(neighbours):
+                nx, ny = xy
+                if x+nx < 0 or x+nx >= size:
+                    continue
+                if y+ny < 0 or y+ny >= size:
+                    continue
+                localSum += matrix[x+nx][y+ny]
+                # print nx, ny, matrix[x+nx][y+ny], "#", localSum
+            matrix[x][y] = localSum
+
+        potentialNewDir = dirs[(curDirIdx +1)%4]
+        if matrix[x+potentialNewDir[0]][y+potentialNewDir[1]] == 0:
+            curDirIdx = (curDirIdx +1)%4
+
+        if matrix[x][y] > data:
+            print "The next biggest value after", data, "is", matrix[x][y]
+            return
+
+        x += dirs[curDirIdx ][0]
+        y += dirs[curDirIdx ][1]
+
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: %s <input_file>" % sys.argv[0])
@@ -80,6 +151,8 @@ def main():
         data = int(f.read().strip())
 
     spiralDist(data)
+    print "================"
+    spiralSum(data)
 
     # for i in range(1020, 1025):
     #     print "======================================="
