@@ -47,7 +47,9 @@ def distribute(data, m, i, size):
 def reallocCycles(data):
     size = len(data)
     patterns = set()
-    patterns.add("".join(str(data)))
+    serialized = "".join(str(data))
+    patterns.add(serialized)
+    seenAt = {serialized: 0}
     m = max(data)
     i = data.index(m)
 
@@ -60,14 +62,15 @@ def reallocCycles(data):
         serialized = "".join(str(data))
         if serialized in patterns:
             looping = True
+            print "Cycle size:", steps - seenAt[serialized]
         else:
             patterns.add(serialized)
+            seenAt[serialized] = steps
             m = max(data)
             i = data.index(m)
-        # print m, i, patterns
 
 
-    print "Steps:", steps, data
+    print "Steps:", steps
 
 
 
