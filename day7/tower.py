@@ -71,36 +71,57 @@ Given that exactly one program is the wrong weight, what would its weight need t
 
 '''
 import sys
+from collections import defaultdict
 
 def calcWeightSubTower(cur, children, weights):
     levelWeight = 0
     childrenWeight = {}
+    foundDiscrepancy = False
     for child in children[cur]:
+        if foundDiscrepancy:
+            # STOP now as we found solution
+            return 0, True
         if child in children.keys():
-            childrenWeight[child] = calcWeightSubTower(child, children, weights)
+            val, found = calcWeightSubTower(child, children, weights)
+            foundDiscrepancy |= found
+            childrenWeight[child] = val
         else:
             childrenWeight[child] = weights[child]
-    normal = None
-    discrepency = False
+    reference = None
+    discrepancy = False
+    weightCnt = defaultdict(int)
     for k,w in childrenWeight.items():
-        if not normal:
-            normal = w
-        else:
-            if w != normal:
-                print "We found a discrepency!", k, w
-                discrepency = True
+        if not reference:
+            reference = w
+        weightCnt[w] += 1
+        if not foundDiscrepancy and w != reference:
+            discrepancy = True
         levelWeight += w
 
-    if discrepency:
+    if discrepancy and not foundDiscrepancy:
+        sortedWeightCnts = sorted(weightCnt.items(),
+                                  key=lambda x: x[1],
+                                  reverse=True)
+
+        print "Weight counts for subtowers:", sortedWeightCnts
+        correctWeight = sortedWeightCnts[0][0]
+        badWeight = sortedWeightCnts[1][0]
+        diff = correctWeight - badWeight
         for k,w in childrenWeight.items():
-            print " ->", k, w
+            correctWeight = w
+            if weightCnt[w] == 1:
+                # This is the bad subtower
+                print "BAD subtower:", k, weights[k]
+                print "Difference:", diff, "correctWeight for", k, ":", weights[k]+diff
+                # STOP now as we found solution
+                return 0, True
 
     levelWeight += weights[cur]
-    return levelWeight
+    return levelWeight, discrepancy
 
-def findBase(data):
+def process(data):
     parents = {}
-    children = {}
+    children = defaultdict(list)
     weights = {}
     for line in data:
         parts = line.split('->')
@@ -116,13 +137,13 @@ def findBase(data):
             for child in parts[1].split(','):
                 child = child.strip()
                 parents[child.strip()] = name
-                children.setdefault(name, []).append(child)
+                children[name].append(child)
 
     base = None
     for k,v in parents.items():
         if not v:
             base = k
-    print "Base is", base
+    print "Base is:", base
 
     calcWeightSubTower(base, children, weights)
 
@@ -137,7 +158,7 @@ def main():
         data = f.readlines()
         data = map(lambda x: x.strip(), data)
 
-        findBase(data)
+        process(data)
 
 if __name__ == '__main__':
     main()
